@@ -6,7 +6,6 @@ import time
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
-
 from models import SolveRequest, AlgorithmResult, CompareRequest, CompareResponse
 from algorithms import brute_force, nearest_neighbor, held_karp
 
@@ -113,21 +112,27 @@ def compare(request: CompareRequest):
             start = time.perf_counter()
             res = fn(nodes_raw)
             elapsed_ms = (time.perf_counter() - start) * 1000
-            results.append(AlgorithmResult(
-                algorithm=name,
-                route=res["route"],
-                total_distance=res["total_distance"],
-                computation_time_ms=round(elapsed_ms, 3),
-                steps=res.get("steps", []),
-            ))
-        except Exception as e:
-            results.append(AlgorithmResult(
-                algorithm=name,
-                route=[],
-                total_distance=-1,
-                computation_time_ms=0,
-                steps=[],
-            ))
+
+            results.append(
+                AlgorithmResult(
+                    algorithm=name,
+                    route=res["route"],
+                    total_distance=res["total_distance"],
+                    computation_time_ms=round(elapsed_ms, 3),
+                    steps=res.get("steps", []),
+                )
+            )
+
+        except Exception:
+            results.append(
+                AlgorithmResult(
+                    algorithm=name,
+                    route=[],
+                    total_distance=-1,
+                    computation_time_ms=0,
+                    steps=[],
+                )
+            )
 
     return CompareResponse(results=results)
 
